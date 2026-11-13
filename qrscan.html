@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101827">
+<title>ScanPro — QR Code Scanner</title>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#0b1220;--panel:#121d30;--panel-2:#18263c;--line:rgba(255,255,255,.09);
+  --text:#f5f7fb;--muted:#9aa9bd;--blue:#4f8cff;--cyan:#27c5d8;
+  --green:#27c995;--red:#ff647c;--shadow:0 22px 60px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+html{min-height:100%;background:var(--bg);scroll-behavior:smooth}
+body{
+  margin:0;min-height:100vh;padding:clamp(12px,3vw,28px);
+  padding-bottom:calc(18px + env(safe-area-inset-bottom));
+  color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  background:radial-gradient(ellipse at 15% 0%,rgba(79,140,255,.2),transparent 38%),
+             radial-gradient(ellipse at 100% 25%,rgba(39,197,216,.13),transparent 34%),var(--bg);
+}
+button{font:inherit}
+.app{width:100%;max-width:570px;margin:0 auto}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin:4px 2px 20px}
+.brand{display:flex;align-items:center;gap:11px}
+.brand-icon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--blue),var(--cyan));font-size:22px;box-shadow:0 8px 22px #2379e544}
+.brand-name{font-weight:800;letter-spacing:.2px;font-size:17px}
+.brand-tag{font-size:11px;color:var(--muted);margin-top:2px}
+.free-pill{font-size:11px;font-weight:800;color:#8de8c8;border:1px solid #27c99555;
+  background:#27c99513;padding:7px 10px;border-radius:99px}
+.card{background:linear-gradient(160deg,rgba(24,38,60,.98),rgba(17,28,46,.98));
+  border:1px solid var(--line);border-radius:24px;padding:clamp(15px,4vw,23px);box-shadow:var(--shadow)}
+.heading{text-align:center;margin:3px 0 17px}
+.heading h1{font-size:clamp(22px,6vw,28px);margin:0;font-weight:850;letter-spacing:-.7px}
+.heading p{color:var(--muted);font-size:13px;line-height:1.55;margin:7px auto 0;max-width:360px}
+.scanner-shell{position:relative;overflow:hidden;border-radius:19px;background:#05080e;
+  border:1px solid rgba(255,255,255,.13);min-height:260px}
+#reader{width:100%;min-height:260px}
+#reader video{object-fit:cover!important;border-radius:18px}
+#reader img{max-width:100%}
+#reader__dashboard_section_csr span{color:#fff!important}
+#reader__dashboard_section_csr button{border:0!important;border-radius:9px!important;padding:9px 12px!important;background:#263b59!important;color:white!important}
+.camera-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;text-align:center;padding:24px;pointer-events:none;color:#dbe6f5}
+.camera-placeholder .camera-icon{font-size:38px;margin-bottom:10px}
+.camera-placeholder strong{font-size:14px}
+.camera-placeholder span{font-size:12px;color:#93a5bd;margin-top:6px;line-height:1.5}
+.scanner-shell.active .camera-placeholder{display:none}
+.scan-frame{position:absolute;inset:50% auto auto 50%;width:min(62vw,230px);height:min(62vw,230px);
+  transform:translate(-50%,-50%);border:2px solid #62d8ef;border-radius:22px;
+  box-shadow:0 0 0 999px rgba(0,0,0,.16);pointer-events:none;display:none}
+.scanner-shell.active .scan-frame{display:block}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.btn{min-height:52px;border:0;border-radius:14px;padding:13px 12px;font-size:14px;font-weight:800;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .15s,filter .15s}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.primary{grid-column:1/-1;color:white;background:linear-gradient(110deg,#397cf4,#20b9d1);box-shadow:0 9px 22px #287fe533}
+.secondary{background:#243650;color:#eaf2ff;border:1px solid var(--line)}
+.stop{background:#462536;color:#ff9eae;border:1px solid #ff647c44}
+.status{display:flex;align-items:center;justify-content:center;gap:7px;color:var(--muted);font-size:11px;margin:12px 0 2px}
+.dot{width:7px;height:7px;border-radius:50%;background:#74849a}
+.status.live .dot{background:var(--green);box-shadow:0 0 0 4px #27c99520}
+.result{display:none;margin-top:18px;padding:16px;border-radius:18px;background:#102d2a;border:1px solid #27c99555}
+.result.show{display:block}
+.result-head{display:flex;align-items:center;gap:8px;color:#82e8c3;font-size:12px;font-weight:850;letter-spacing:.7px}
+.result-text{margin:12px 0 14px;padding:12px;background:#081e1d;border:1px solid #ffffff12;border-radius:12px;
+  color:#f1fbf7;font-size:14px;line-height:1.55;overflow-wrap:anywhere;white-space:pre-wrap;max-height:180px;overflow:auto}
+.result-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.result-actions a,.result-actions button{min-height:45px;border:0;border-radius:11px;text-decoration:none;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;cursor:pointer}
+.open-link{background:#4f8cff;color:white}.copy{background:#f3c96b;color:#252b35}
+.history{margin-top:20px;display:none}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.section-title h2{font-size:14px;margin:0}
+.clear{background:none;border:0;color:#8fb5ff;font-size:12px;font-weight:700;padding:6px;cursor:pointer}
+.history-item{display:flex;align-items:center;gap:10px;padding:11px 12px;margin-top:7px;
+  border:1px solid var(--line);border-radius:12px;background:#ffffff05;cursor:pointer;min-width:0}
+.history-item:active{background:#ffffff10}
+.history-symbol{width:30px;height:30px;flex:none;border-radius:9px;background:#28466b;display:grid;place-items:center}
+.history-value{font-size:12px;color:#dce6f4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.history-copy{color:#9eb9dc;font-size:11px}
+.info{margin-top:18px;padding:14px;border-radius:15px;background:#ffffff08;border:1px solid var(--line);
+  color:var(--muted);font-size:12px;line-height:1.65}
+.info strong{color:#e5edf8}
+.footer{text-align:center;color:#718198;font-size:11px;margin:17px 0 2px}
+#fileInput{display:none}
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translate(-50%,20px);
+  opacity:0;pointer-events:none;background:#f5f8ff;color:#152238;padding:11px 16px;border-radius:12px;
+  font-size:13px;font-weight:750;box-shadow:0 10px 30px #0005;transition:.22s;z-index:10;max-width:90%;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:390px){body{padding:10px}.card{border-radius:19px}.actions{gap:8px}.btn{font-size:13px;padding:12px 8px}.scanner-shell,#reader{min-height:235px}}
+@media(min-width:600px){body{padding-top:32px}.card{padding:24px}}
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon">▦</div>
+      <div><div class="brand-name">ScanPro</div><div class="brand-tag">Fast QR & barcode reader</div></div>
+    </div>
+    <span class="free-pill">100% FREE</span>
+  </header>
+
+  <section class="card">
+    <div class="heading">
+      <h1>QR Code Scanner</h1>
+      <p>Scan a code with your camera or choose an image from your phone gallery.</p>
+    </div>
+
+    <div class="scanner-shell" id="scannerShell">
+      <div id="reader"></div>
+      <div class="camera-placeholder" id="cameraPlaceholder">
+        <div class="camera-icon">📷</div>
+        <strong>Your camera preview will appear here</strong>
+        <span>Tap “Start camera” and allow camera access when your browser asks.</span>
+      </div>
+      <div class="scan-frame"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="startBtn" type="button">📸 Start camera</button>
+      <button class="btn secondary" id="uploadBtn" type="button">🖼️ Scan from gallery</button>
+      <button class="btn secondary" id="stopBtn" type="button" style="display:none">⏹ Stop camera</button>
+    </div>
+    <input type="file" id="fileInput" accept="image/*">
+
+    <div class="status" id="status"><span class="dot"></span><span id="statusText">Camera is off · Ready to scan</span></div>
+
+    <section class="result" id="resultBox" aria-live="polite">
+      <div class="result-head">✓ SCAN SUCCESSFUL</div>
+      <div class="result-text" id="resultText"></div>
+      <div class="result-actions">
+        <a class="open-link" id="openBtn" href="#" target="_blank" rel="noopener noreferrer" style="display:none">↗ Open result</a>
+        <button class="copy" id="copyBtn" type="button">▢ Copy result</button>
+      </div>
+    </section>
+
+    <section class="history" id="historyBox">
+      <div class="section-title"><h2>Recent scans</h2><button class="clear" id="clearHistory" type="button">Clear history</button></div>
+      <div id="historyList"></div>
+    </section>
+
+    <div class="info">
+      <strong>Quick tips</strong><br>
+      • Keep the QR code inside the square and hold your phone steady.<br>
+      • For camera access, open this page on HTTPS (for example, Netlify) or localhost.<br>
+      • Gallery scanning works with clear, well-lit QR images. Your scan history stays on this device.
+    </div>
+  </section>
+  <footer class="footer">Made for everyone 🇵🇰 · No app installation required</footer>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  let scanner = null;
+  let scanning = false;
+  let processing = false;
+  let historyItems = [];
+
+  try {
+    const saved = JSON.parse(localStorage.getItem('scanpro-history') || '[]');
+    if (Array.isArray(saved)) historyItems = saved.filter(x => typeof x === 'string').slice(0, 8);
+  } catch (_) {}
+
+  function toast(message) {
+    $('toast').textContent = message;
+    $('toast').classList.add('show');
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => $('toast').classList.remove('show'), 2300);
+  }
+
+  function setStatus(message, live = false) {
+    $('statusText').textContent = message;
+    $('status').classList.toggle('live', live);
+  }
+
+  function safeOpenTarget(value) {
+    const text = value.trim();
+    if (/^https?:\/\//i.test(text)) {
+      try {
+        const url = new URL(text);
+        return ['http:', 'https:'].includes(url.protocol) ? url.href : null;
+      } catch (_) { return null; }
+    }
+    if (/^www\./i.test(text)) return 'https://' + text;
+    if (/^mailto:/i.test(text)) return text;
+    if (/^tel:/i.test(text)) return text;
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text)) return 'mailto:' + text;
+    return null;
+  }
+
+  function renderResult(value) {
+    $('resultText').textContent = value;
+    $('resultBox').classList.add('show');
+    const target = safeOpenTarget(value);
+    const open = $('openBtn');
+    if (target) {
+      open.href = target;
+      open.textContent = target.startsWith('mailto:') ? '✉ Send email' : target.startsWith('tel:') ? '☎ Call number' : '↗ Open link';
+      open.style.display = 'flex';
+    } else {
+      open.removeAttribute('href');
+      open.style.display = 'none';
+    }
+
+    if (!historyItems.includes(value)) {
+      historyItems.unshift(value);
+      historyItems = historyItems.slice(0, 8);
+      try { localStorage.setItem('scanpro-history', JSON.stringify(historyItems)); } catch (_) {}
+      renderHistory();
+    }
+    if (navigator.vibrate) navigator.vibrate(100);
+    $('resultBox').scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  function renderHistory() {
+    $('historyBox').style.display = historyItems.length ? 'block' : 'none';
+    $('historyList').replaceChildren();
+    historyItems.forEach((value, index) => {
+      const item = document.createElement('div');
+      item.className = 'history-item';
+      item.setAttribute('role', 'button');
+      item.setAttribute('tabindex', '0');
+      const symbol = document.createElement('span');
+      symbol.className = 'history-symbol';
+      symbol.textContent = '▦';
+      const text = document.createElement('span');
+      text.className = 'history-value';
+      text.textContent = value;
+      const copy = document.createElement('span');
+      copy.className = 'history-copy';
+      copy.textContent = 'COPY';
+      item.append(symbol, text, copy);
+      const copyValue = () => copyToClipboard(value);
+      item.addEventListener('click', copyValue);
+      item.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); copyValue(); } });
+      $('historyList').append(item);
+    });
+  }
+
+  async function copyToClipboard(value) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(value);
+      else {
+        const temp = document.createElement('textarea');
+        temp.value = value; temp.style.position = 'fixed'; temp.style.opacity = '0';
+        document.body.append(temp); temp.select();
+        const ok = document.execCommand('copy'); temp.remove();
+        if (!ok) throw new Error('Copy failed');
+      }
+      toast('Copied to clipboard');
+    } catch (_) { toast('Could not copy. Please select the text manually.'); }
+  }
+
+  async function onScanSuccess(decodedText) {
+    if (processing) return;
+    processing = true;
+    renderResult(decodedText);
+    if (scanning) await stopCamera();
+    processing = false;
+  }
+
+  async function startCamera() {
+    if (scanning) return;
+    if (!window.Html5Qrcode) { toast('Scanner library could not load. Check your internet connection.'); return; }
+    $('resultBox').classList.remove('show');
+    $('startBtn').disabled = true;
+    setStatus('Requesting camera permission…');
+    try {
+      if (!scanner) scanner = new Html5Qrcode('reader', { verbose: false });
+      await scanner.start(
+        { facingMode: 'environment' },
+        { fps: 12, qrbox: (w, h) => {
+          const size = Math.floor(Math.min(w, h, 260) * 0.78);
+          return { width: size, height: size };
+        }, aspectRatio: 1.0 },
+        onScanSuccess,
+        () => {}
+      );
+      scanning = true;
+      $('scannerShell').classList.add('active');
+      $('startBtn').style.display = 'none';
+      $('stopBtn').style.display = 'block';
+      $('stopBtn').disabled = false;
+      setStatus('Camera is on · Point at a QR code', true);
+    } catch (error) {
+      setStatus('Camera is off · Ready to scan');
+      let message = 'Could not start camera. Allow camera permission and use HTTPS.';
+      if (String(error).toLowerCase().includes('notfound')) message = 'No camera was found on this device.';
+      else if (String(error).toLowerCase().includes('notallowed') || String(error).toLowerCase().includes('permission')) message = 'Camera permission was denied. Allow it in browser settings.';
+      toast(message);
+    } finally {
+      $('startBtn').disabled = false;
+    }
+  }
+
+  async function stopCamera() {
+    if (scanner && scanning) {
+      try { await scanner.stop(); } catch (_) {}
+      try { scanner.clear(); } catch (_) {}
+    }
+    scanning = false;
+    $('scannerShell').classList.remove('active');
+    $('startBtn').style.display = 'flex';
+    $('stopBtn').style.display = 'none';
+    setStatus('Camera is off · Ready to scan');
+  }
+
+  async function scanImage(event) {
+    const file = event.target.files && event.target.files[0];
+    event.target.value = '';
+    if (!file) return;
+    if (!window.Html5Qrcode) { toast('Scanner library could not load. Check your internet connection.'); return; }
+    $('resultBox').classList.remove('show');
+    $('uploadBtn').disabled = true;
+    setStatus('Reading image…');
+    try {
+      if (scanning) await stopCamera();
+      if (!scanner) scanner = new Html5Qrcode('reader', { verbose: false });
+      const decoded = await scanner.scanFile(file, true);
+      await onScanSuccess(decoded);
+      setStatus('Image scanned successfully');
+    } catch (_) {
+      setStatus('Camera is off · Ready to scan');
+      toast('No QR code found. Try a sharper, brighter image.');
+    } finally {
+      $('uploadBtn').disabled = false;
+    }
+  }
+
+  $('startBtn').addEventListener('click', startCamera);
+  $('stopBtn').addEventListener('click', stopCamera);
+  $('uploadBtn').addEventListener('click', () => $('fileInput').click());
+  $('fileInput').addEventListener('change', scanImage);
+  $('copyBtn').addEventListener('click', () => copyToClipboard($('resultText').textContent));
+  $('clearHistory').addEventListener('click', () => {
+    historyItems = [];
+    try { localStorage.removeItem('scanpro-history'); } catch (_) {}
+    renderHistory();
+    toast('Scan history cleared');
+  });
+  renderHistory();
+  window.addEventListener('pagehide', () => {
+    if (scanner && scanning) scanner.stop().catch(() => {});
+  });
+})();
+</script>
+</body>
+</html>

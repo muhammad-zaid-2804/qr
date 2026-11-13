@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#635bdb">
+  <meta name="description" content="Create and download custom QR codes for links, text and WhatsApp. Free, fast and mobile-friendly.">
+  <title>QR Studio — Free QR Code Generator</title>
+  <style>
+    :root {
+      --primary:#635bdb; --primary-dark:#5148c7; --ink:#1e2440;
+      --muted:#707792; --line:#e8eaf3; --surface:#f7f8fc;
+      --success:#138a62; --danger:#c43d53;
+    }
+    * { box-sizing:border-box; }
+    html { -webkit-text-size-adjust:100%; }
+    body {
+      margin:0; min-height:100vh; padding:24px 16px;
+      display:flex; align-items:center; justify-content:center;
+      color:var(--ink); font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+      background:radial-gradient(circle at 10% 10%,#aaa5ff 0,transparent 32%),
+                 radial-gradient(circle at 90% 85%,#8de8df 0,transparent 30%),
+                 linear-gradient(135deg,#eeefff,#e9fbf8);
+    }
+    button,input,select { font:inherit; }
+    button { -webkit-tap-highlight-color:transparent; }
+    .app { width:min(100%,520px); }
+    .topline { display:flex; align-items:center; justify-content:center; gap:9px; margin:0 0 15px; }
+    .brand-mark {
+      width:38px;height:38px;border-radius:12px;display:grid;place-items:center;
+      color:#fff;background:linear-gradient(145deg,#766ef0,#5148c7);
+      box-shadow:0 7px 18px #635bdb45;font-size:20px;
+    }
+    .brand { font-size:15px;font-weight:800;letter-spacing:.2px; }
+    .brand span { color:var(--primary); }
+    .card {
+      background:rgba(255,255,255,.97); border:1px solid #ffffff;
+      border-radius:25px; padding:clamp(20px,5vw,32px);
+      box-shadow:0 22px 65px rgba(43,48,95,.14);
+    }
+    header { text-align:center; margin-bottom:24px; }
+    h1 { font-size:clamp(24px,6vw,30px); letter-spacing:-.8px; margin:0 0 8px; }
+    .subtitle { color:var(--muted);font-size:14px;line-height:1.55;margin:0; }
+    .free-tag {
+      display:inline-flex;align-items:center;gap:6px;margin-top:13px;padding:6px 10px;
+      border-radius:30px;background:#effaf5;color:#16805d;font-size:11px;font-weight:800;
+    }
+    .field-label { display:flex;justify-content:space-between;align-items:center;gap:8px;margin:19px 0 8px;font-size:13px;font-weight:750; }
+    .hint { color:#969bb0;font-size:11px;font-weight:500; }
+    .text-wrap { position:relative; }
+    input[type="text"],select {
+      width:100%; min-height:50px; border:1.5px solid var(--line);border-radius:13px;
+      background:#fff;color:var(--ink);padding:13px 14px;outline:none;font-size:15px;
+      transition:border-color .18s,box-shadow .18s;
+    }
+    input[type="text"]:focus,select:focus {
+      border-color:var(--primary);box-shadow:0 0 0 4px #635bdb18;
+    }
+    .quick { display:flex;gap:8px;overflow-x:auto;padding:3px 1px 7px;scrollbar-width:none; }
+    .quick::-webkit-scrollbar { display:none; }
+    .chip {
+      flex:0 0 auto;border:1px solid var(--line);background:#fff;color:#555d78;
+      border-radius:30px;padding:9px 12px;font-size:12px;font-weight:700;cursor:pointer;
+    }
+    .chip:active { transform:scale(.97); }
+    .settings { display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:10px; }
+    .settings .field-label { margin-top:14px; }
+    input[type="color"] {
+      display:block;width:100%;height:50px;padding:5px;border:1.5px solid var(--line);
+      border-radius:13px;background:#fff;cursor:pointer;
+    }
+    input[type="color"]::-webkit-color-swatch-wrapper { padding:2px; }
+    input[type="color"]::-webkit-color-swatch { border:0;border-radius:8px; }
+    .primary-btn,.secondary-btn {
+      width:100%;min-height:52px;border:0;border-radius:14px;cursor:pointer;
+      font-weight:800;font-size:15px;transition:transform .15s,background .15s;
+    }
+    .primary-btn {
+      margin-top:22px;color:#fff;background:linear-gradient(135deg,#7068eb,#554bc9);
+      box-shadow:0 9px 20px #635bdb35;
+    }
+    .primary-btn:hover { background:linear-gradient(135deg,#625ae0,#493fb9); }
+    .primary-btn:active,.secondary-btn:active { transform:scale(.985); }
+    button:focus-visible { outline:3px solid #aaa5ff;outline-offset:3px; }
+    button:disabled { opacity:.65;cursor:wait; }
+    .result {
+      display:none;margin-top:22px;padding:20px 16px 17px;text-align:center;
+      border:1px solid #e7e8f7;border-radius:19px;background:linear-gradient(180deg,#fafaff,#f5f7ff);
+    }
+    .result.show { display:block;animation:rise .25s ease-out; }
+    @keyframes rise { from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none} }
+    .result-title { font-size:15px;font-weight:800;margin-bottom:4px; }
+    .result-sub { color:var(--muted);font-size:12px;margin-bottom:15px; }
+    .qr-frame {
+      width:min(100%,260px);aspect-ratio:1;margin:0 auto 15px;padding:10px;
+      display:grid;place-items:center;background:#fff;border:1px solid #eceef5;
+      border-radius:16px;box-shadow:0 7px 22px #25294b0d;
+    }
+    .qr-frame img { display:block;width:100%;height:100%;object-fit:contain; }
+    .qr-frame img[hidden] { display:none; }
+    .placeholder { color:#9ba1b4;font-size:13px; }
+    .actions { display:grid;grid-template-columns:1fr 1fr;gap:9px; }
+    .secondary-btn { min-height:46px;font-size:13px;border:1px solid var(--line);background:#fff;color:var(--ink); }
+    .secondary-btn.download { color:#fff;background:#14845f;border-color:#14845f; }
+    .status { min-height:18px;margin:11px 0 0;font-size:12px;color:var(--muted);line-height:1.4; }
+    .status.error { color:var(--danger); }
+    .status.ok { color:var(--success); }
+    .footer { text-align:center;color:#9298ad;font-size:11px;margin:16px 0 0; }
+    .footer strong { color:#737a96; }
+    @media(max-width:390px) {
+      body { padding:12px 10px;align-items:flex-start; }
+      .card { border-radius:20px;padding:20px 16px; }
+      .settings { grid-template-columns:1fr 1fr; }
+      .settings > div:first-child { grid-column:1/-1; }
+      .settings .field-label { margin-top:12px; }
+      .qr-frame { width:min(100%,230px); }
+    }
+    @media(min-height:850px) { body { padding-top:36px;padding-bottom:36px; } }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="topline">
+      <div class="brand-mark" aria-hidden="true">▦</div>
+      <div class="brand">QR <span>STUDIO</span></div>
+    </div>
+
+    <section class="card" aria-labelledby="page-title">
+      <header>
+        <h1 id="page-title">Create your QR code</h1>
+        <p class="subtitle">Turn any link, message or WhatsApp number into a QR code in seconds.</p>
+        <div class="free-tag">✦ FREE TO USE <span>•</span> NO SIGN-UP</div>
+      </header>
+
+      <label class="field-label" for="qrText">
+        <span>Your text or link</span><span class="hint">Required</span>
+      </label>
+      <div class="text-wrap">
+        <input id="qrText" type="text" maxlength="2000" autocomplete="url"
+          placeholder="Paste a website link, text or WhatsApp URL"
+          value="https://wa.me/923001234567">
+      </div>
+
+      <div class="field-label"><span>Quick start</span><span class="hint">Tap to fill</span></div>
+      <div class="quick" aria-label="Quick examples">
+        <button class="chip" type="button" data-value="https://wa.me/923001234567">☏ WhatsApp</button>
+        <button class="chip" type="button" data-value="https://youtube.com/">▶ YouTube</button>
+        <button class="chip" type="button" data-value="https://instagram.com/">◎ Instagram</button>
+        <button class="chip" type="button" data-value="Hello! Thanks for scanning.">✎ Plain text</button>
+      </div>
+
+      <div class="settings">
+        <div>
+          <label class="field-label" for="size">QR size</label>
+          <select id="size">
+            <option value="300x300">300 × 300</option>
+            <option value="500x500" selected>500 × 500</option>
+            <option value="1000x1000">1000 × 1000 HD</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label" for="qrColor">QR color</label>
+          <input id="qrColor" type="color" value="#17172b" aria-label="QR code color">
+        </div>
+        <div>
+          <label class="field-label" for="bgColor">Background</label>
+          <input id="bgColor" type="color" value="#ffffff" aria-label="QR background color">
+        </div>
+      </div>
+
+      <button class="primary-btn" id="generateBtn" type="button">✦ Generate QR Code</button>
+
+      <section class="result" id="resultBox" aria-live="polite">
+        <div class="result-title">Your QR code is ready</div>
+        <div class="result-sub">Scan it with your phone camera to test it.</div>
+        <div class="qr-frame">
+          <span class="placeholder" id="placeholder">Your QR code will appear here</span>
+          <img id="qrImg" alt="Generated QR code" hidden>
+        </div>
+        <div class="actions">
+          <button class="secondary-btn download" id="downloadBtn" type="button" disabled>↓ Download PNG</button>
+          <button class="secondary-btn" id="copyBtn" type="button">Copy content</button>
+        </div>
+        <p class="status" id="status" role="status"></p>
+      </section>
+    </section>
+    <p class="footer">Made with care <strong>for everyone in Pakistan 🇵🇰</strong></p>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let currentQrUrl = "";
+
+    function setStatus(message, type = "") {
+      const status = $("status");
+      status.textContent = message;
+      status.className = "status" + (type ? " " + type : "");
+    }
+
+    function buildQrUrl(value) {
+      const size = $("size").value;
+      const color = $("qrColor").value.slice(1);
+      const background = $("bgColor").value.slice(1);
+      const params = new URLSearchParams({
+        size, data: value, color, bgcolor: background, margin: "12", format: "png"
+      });
+      return "https://api.qrserver.com/v1/create-qr-code/?" + params.toString();
+    }
+
+    async function generate() {
+      const value = $("qrText").value.trim();
+      if (!value) {
+        $("qrText").focus();
+        $("resultBox").classList.add("show");
+        setStatus("Please enter some text, a link or a WhatsApp number.", "error");
+        return;
+      }
+
+      const button = $("generateBtn");
+      const image = $("qrImg");
+      button.disabled = true;
+      button.textContent = "Creating your QR code…";
+      $("resultBox").classList.add("show");
+      $("placeholder").hidden = false;
+      $("placeholder").textContent = "Generating…";
+      image.hidden = true;
+      $("downloadBtn").disabled = true;
+      setStatus("Please wait while your QR code is created.");
+
+      const url = buildQrUrl(value);
+      const testImage = new Image();
+
+      testImage.onload = () => {
+        image.src = url;
+        image.hidden = false;
+        $("placeholder").hidden = true;
+        currentQrUrl = url;
+        $("downloadBtn").disabled = false;
+        setStatus("QR code generated successfully.", "ok");
+        button.disabled = false;
+        button.textContent = "✦ Generate QR Code";
+      };
+      testImage.onerror = () => {
+        $("placeholder").textContent = "Could not load QR code. Check your internet and try again.";
+        setStatus("QR service could not be reached. Please check your connection and retry.", "error");
+        button.disabled = false;
+        button.textContent = "✦ Try Again";
+      };
+      testImage.src = url;
+    }
+
+    async function downloadQr() {
+      if (!currentQrUrl) return;
+      const button = $("downloadBtn");
+      button.disabled = true;
+      setStatus("Preparing your PNG download…");
+      try {
+        const response = await fetch(currentQrUrl);
+        if (!response.ok) throw new Error("Download failed");
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = objectUrl;
+        link.download = "my-qr-code.png";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(objectUrl);
+        setStatus("Download started. Your QR code is saved as a PNG.", "ok");
+      } catch (error) {
+        // Some browsers or networks block cross-origin downloads. Open the image as a fallback.
+        window.open(currentQrUrl, "_blank", "noopener");
+        setStatus("Opened the QR image. Long-press it and choose Save image.", "ok");
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    async function copyContent() {
+      const value = $("qrText").value.trim();
+      if (!value) return setStatus("There is no content to copy.", "error");
+      try {
+        await navigator.clipboard.writeText(value);
+        setStatus("Content copied to clipboard.", "ok");
+      } catch {
+        $("qrText").select();
+        setStatus("Select and copy the text from the input field.", "");
+      }
+    }
+
+    document.querySelectorAll(".chip").forEach((button) => {
+      button.addEventListener("click", () => {
+        $("qrText").value = button.dataset.value;
+        generate();
+      });
+    });
+    $("generateBtn").addEventListener("click", generate);
+    $("downloadBtn").addEventListener("click", downloadQr);
+    $("copyBtn").addEventListener("click", copyContent);
+    $("qrText").addEventListener("keydown", (event) => {
+      if (event.key === "Enter") generate();
+    });
+
+    // Automatically refresh the preview when appearance settings change.
+    ["size", "qrColor", "bgColor"].forEach((id) => {
+      $(id).addEventListener("change", () => {
+        if ($("qrText").value.trim()) generate();
+      });
+    });
+
+    generate();
+  </script>
+</body>
+</html>
