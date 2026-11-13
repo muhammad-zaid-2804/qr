@@ -2,66 +2,69 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>QR Tools - Create & Scan QR Code Free</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+html,body{width:100%;overflow-x:hidden}
 body{
   background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
   min-height:100vh;display:flex;align-items:center;justify-content:center;
-  padding:20px;overflow:hidden;position:relative;color:#fff;
+  padding:16px;color:#fff;position:relative;
 }
-.circle{position:absolute;border-radius:50%;filter:blur(60px);opacity:.5;z-index:0}
-.c1{width:320px;height:320px;background:#6C5CE7;top:-80px;left:-80px}
-.c2{width:380px;height:380px;background:#00CEC9;bottom:-100px;right:-80px}
-.c3{width:200px;height:200px;background:#fd79a8;top:40%;left:60%}
+.bg{position:fixed;inset:0;overflow:hidden;z-index:0;pointer-events:none}
+.circle{position:absolute;border-radius:50%;filter:blur(60px);opacity:.5}
+.c1{width:280px;height:280px;background:#6C5CE7;top:-60px;left:-60px}
+.c2{width:300px;height:300px;background:#00CEC9;bottom:-80px;right:-60px}
+.c3{width:180px;height:180px;background:#fd79a8;top:45%;left:55%}
 .card{
   position:relative;z-index:2;
   background:rgba(255,255,255,.12);
   backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
   border:1px solid rgba(255,255,255,.25);
-  width:100%;max-width:480px;border-radius:28px;padding:36px 28px;
+  width:100%;max-width:440px;border-radius:28px;padding:32px 22px;
   text-align:center;box-shadow:0 25px 50px rgba(0,0,0,.4);
 }
 .logo{
-  width:78px;height:78px;margin:0 auto 14px;background:#fff;border-radius:22px;
+  width:72px;height:72px;margin:0 auto 12px;background:#fff;border-radius:20px;
   display:flex;align-items:center;justify-content:center;
-  font-size:42px;box-shadow:0 10px 25px rgba(0,0,0,.3);transform:rotate(-4deg);
+  font-size:38px;box-shadow:0 10px 25px rgba(0,0,0,.3);
 }
-h1{font-size:32px;line-height:1.1;letter-spacing:-.5px}
+h1{font-size:30px;line-height:1.15;letter-spacing:-.5px}
 h1 span{
   background:linear-gradient(90deg,#ffeaa7,#00CEC9,#fd79a8);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
-p.sub{color:#dfe6e9;font-size:15px;margin:10px 0 24px;line-height:1.6}
+p.sub{color:#dfe6e9;font-size:14.5px;margin:10px 0 22px;line-height:1.6}
 .badge{
   display:inline-block;background:rgba(255,255,255,.18);
   border:1px solid rgba(255,255,255,.25);
-  padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:16px;
+  padding:6px 13px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:15px;
 }
 .btn{
-  display:flex;align-items:center;gap:16px;width:100%;text-align:left;text-decoration:none;
-  background:#fff;color:#2d3436;border:none;border-radius:18px;padding:18px;
-  margin-bottom:14px;cursor:pointer;transition:.25s;box-shadow:0 10px 20px rgba(0,0,0,.2);
+  display:flex;align-items:center;gap:14px;width:100%;text-align:left;text-decoration:none;
+  background:#fff;color:#2d3436;border-radius:18px;padding:16px;
+  margin-bottom:13px;box-shadow:0 10px 20px rgba(0,0,0,.2);
 }
-.btn:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 18px 30px rgba(0,0,0,.3)}
 .btn:active{transform:scale(.98)}
-.icon{min-width:58px;height:58px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff}
+.icon{min-width:52px;width:52px;height:52px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;flex-shrink:0}
 .i1{background:linear-gradient(135deg,#6C5CE7,#a29bfe)}
 .i2{background:linear-gradient(135deg,#00b894,#00CEC9)}
-.btn b{font-size:18px;display:block}
-.btn small{font-size:13px;color:#636e72}
-.arrow{margin-left:auto;font-size:22px;color:#b2bec3;font-weight:800}
-.features{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:18px}
-.features span{background:rgba(0,0,0,.25);padding:7px 12px;border-radius:20px;font-size:12px;font-weight:600;color:#dfe6e9}
-.footer{font-size:11px;color:#b2bec3;margin-top:20px}
+.btn b{font-size:17px;display:block;line-height:1.3}
+.btn small{font-size:12.5px;color:#636e72;line-height:1.4;display:block;margin-top:2px}
+.arrow{margin-left:auto;font-size:20px;color:#b2bec3;font-weight:800;flex-shrink:0}
+.features{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin-top:16px}
+.features span{background:rgba(0,0,0,.25);padding:7px 11px;border-radius:20px;font-size:11.5px;font-weight:600;color:#dfe6e9}
+.footer{font-size:11px;color:#b2bec3;margin-top:18px}
 </style>
 </head>
 <body>
 
-<div class="circle c1"></div>
-<div class="circle c2"></div>
-<div class="circle c3"></div>
+<div class="bg">
+  <div class="circle c1"></div>
+  <div class="circle c2"></div>
+  <div class="circle c3"></div>
+</div>
 
 <div class="card">
   <div class="badge">100% FREE • NO SIGN UP</div>
