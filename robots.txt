@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://qrtoolspro.netlify.app/sitemap.xml
